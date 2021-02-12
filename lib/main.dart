@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:process_run/shell.dart';
+import 'package:scrcpy_plus_plus_gui/adbdevice.dart';
 import 'package:window_size/window_size.dart';
 
 Future<void> main() async {
@@ -11,13 +12,13 @@ Future<void> main() async {
     if (window.screen != null) {
       final screenFrame = window.screen.visibleFrame;
       final width = 600.0;
-      final height = 1000.0;
+      final height = 1200.0;
       final left = ((screenFrame.width - width) / 2).roundToDouble();
       final top = ((screenFrame.height - height) / 3).roundToDouble();
       final frame = Rect.fromLTWH(left, top, width, height);
       setWindowFrame(frame);
       setWindowTitle("Scrcpy++");
-      setWindowMinSize(Size(500.0, 920.0));
+      setWindowMinSize(Size(500.0, 1000.0));
     }
   }
   runApp(MyApp());
@@ -27,6 +28,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Scrcpy++',
       theme: ThemeData(
         brightness: Brightness.dark,
@@ -67,9 +69,17 @@ class _MyHomePageState extends State<MyHomePage> {
   String _bitrateValue = '8M';
   String _framerate = 'No Limit';
   int _framerateValue = 0;
+  bool initialLoad = true;
+  Set<ADBDevice> adbDeviceSet = Set<ADBDevice>();
+  List<ADBDevice> adbDeviceList;
 
   @override
   Widget build(BuildContext context) {
+    if (initialLoad) {
+      _adb();
+      initialLoad = false;
+    }
+    adbDeviceList = adbDeviceSet.toList();
     return Scaffold(
       appBar: AppBar(title: Text(widget.title), backgroundColor: Colors.indigo),
       body: Padding(
@@ -80,7 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
               Text(
                 "Window Configuration",
                 style: TextStyle(
-                  fontSize: 20.0,
+                  fontSize: 16.0,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -334,7 +344,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: Text(
                   "Capture Configuration",
                   style: TextStyle(
-                    fontSize: 20.0,
+                    fontSize: 16.0,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -534,6 +544,53 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
               Container(
+                margin: EdgeInsets.fromLTRB(0, 8, 0, 0),
+                child: Divider(),
+              ),
+              Container(
+                margin: EdgeInsets.fromLTRB(0, 8, 0, 0),
+                child: Row(children: [
+                  Expanded(
+                    child: Text(
+                      "Connected Devices",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: _adb,
+                    child: Padding(
+                        padding: EdgeInsets.fromLTRB(0, 0, 8, 0),
+                        child: Icon(Icons.refresh)),
+                  )
+                ]),
+              ),
+              Container(
+                margin: EdgeInsets.fromLTRB(0, 8, 0, 0),
+                child: Divider(),
+              ),
+              ListView.builder(
+                shrinkWrap: true,
+                itemCount: adbDeviceSet.length,
+                itemBuilder: (context, index) {
+                  return CheckboxListTile(
+                    activeColor: Colors.indigoAccent,
+                    title: Text(adbDeviceList[index].deviceName +
+                        " | " +
+                        adbDeviceList[index].deviceType),
+                    value: adbDeviceList[index].selected,
+                    onChanged: (value) {
+                      setState(() {
+                        adbDeviceList[index].selected = value;
+                      });
+                    },
+                  );
+                },
+              ),
+              Container(
                 margin: EdgeInsets.fromLTRB(0, 16, 0, 0),
                 child: Divider(),
               ),
@@ -564,9 +621,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
-  Future<void> _startScrcpy() async {
-    var shell = Shell();
-
+  Future<void> _startScrcpy() {
     if (_titleController.text.isEmpty) {
       _deviceTitle = "Android Device";
     } else {
@@ -613,8 +668,46 @@ class _MyHomePageState extends State<MyHomePage> {
           scrcpyCommand + " --lock-video-orientation $_videoOrientationValue";
     }
 
-    await shell.run('''
-      $scrcpyCommand
-    ''');
+    adbDeviceList.forEach((element) async {
+      if (element.selected) {
+        var deviceSerial = element.deviceName;
+        var tempScrcpyCommand = scrcpyCommand + " --serial $deviceSerial";
+
+        try {
+          await Shell().run('''
+            $tempScrcpyCommand
+          ''');
+        } on ShellException catch (_) {
+          // We might get a shell exception
+        }
+      }
+    });
+  }
+
+  Future<void> _adb() async {
+    adbDeviceSet.clear();
+    var controller = ShellLinesController();
+    var shell = Shell(stdout: controller.sink, verbose: false);
+    controller.stream.listen((event) {
+      event = event.trim();
+
+      if (event.toLowerCase() != "list of devices attached") {
+        event = event.replaceAll(
+            new RegExp(r"\s+"), " "); //Replace multiple space with single space
+
+        var splitAdbDeviceEntry = event.split(" ");
+
+        setState(() {
+          adbDeviceSet.add(
+              ADBDevice(true, splitAdbDeviceEntry[0], splitAdbDeviceEntry[1]));
+        });
+        shell.kill();
+      }
+    });
+    try {
+      await shell.run('adb devices');
+    } on ShellException catch (_) {
+      // We might get a shell exception
+    }
   }
 }
