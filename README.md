@@ -27,4 +27,5 @@ On some devices, you also need to enable an additional option to control it usin
 __adb__ must be installed and accesible through terminal (in PATH) using adb command.
 
 Screenshot: 
-![alt text](Screenshot.png)
+
+<img src="Screenshot.png" width="400">
