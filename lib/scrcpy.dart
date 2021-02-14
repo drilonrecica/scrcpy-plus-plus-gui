@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:process_run/shell_run.dart';
@@ -663,9 +665,14 @@ class _ScrcpyPageState extends State<ScrcpyPage> {
             "adb": adbPath,
             "ADB": adbPath
           };
-          await Shell(
-                  environment: environment, workingDirectory: "/usr/local/bin/")
-              .run("$tempScrcpyCommand");
+          Shell shell;
+          if (Platform.isMacOS) {
+            shell = Shell(
+                environment: environment, workingDirectory: "/usr/local/bin/");
+          } else {
+            shell = Shell(environment: environment);
+          }
+          await shell.run("$tempScrcpyCommand");
         } on ShellException catch (_) {
           // We might get a shell exception
         }

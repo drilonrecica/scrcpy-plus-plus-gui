@@ -86,11 +86,14 @@ class _MyHomePageState extends State<MyHomePage> {
         });
       }
     } else {
-      widget.box.writeIfNull(MyApp.keyscrcpyPath, "/usr/local/bin/scrcpy");
-      scrcpyPath = widget.box.read(MyApp.keyscrcpyPath);
-      setState(() {
-        _scrcpyPathController.text = scrcpyPath;
-      });
+      if (Platform.isMacOS && widget.initial && firstPageLoad) {
+        widget.box.writeIfNull(MyApp.keyscrcpyPath, "/usr/local/bin/scrcpy");
+        scrcpyPath = widget.box.read(MyApp.keyscrcpyPath);
+        setState(() {
+          _scrcpyPathController.text = scrcpyPath;
+          firstPageLoad = false;
+        });
+      }
     }
 
     if (!widget.initial && firstPageLoad) {
