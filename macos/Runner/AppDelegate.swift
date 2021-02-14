@@ -8,6 +8,7 @@ class AppDelegate: FlutterAppDelegate {
     }
     
   override func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+    signal(SIGPIPE, SIG_IGN) //Ignore signal
     return true
   }
 }
