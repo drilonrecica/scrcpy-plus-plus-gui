@@ -46,6 +46,8 @@ class MyApp extends StatelessWidget {
       ),
       home: MyHomePage(title: 'Scrcpy++', box: box, initial: true),
       routes: <String, WidgetBuilder>{
+        '/homepageAsInitial': (BuildContext context) =>
+            MyHomePage(title: 'Scrcpy++', box: box, initial: true),
         '/homepageAsSetting': (BuildContext context) =>
             MyHomePage(title: 'Scrcpy++', box: box, initial: false),
         '/scrcpypage': (BuildContext context) => ScrcpyPage(),
@@ -109,7 +111,16 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(widget.title), backgroundColor: Colors.indigo),
+      appBar: AppBar(
+          title: GestureDetector(
+              onDoubleTap: () {
+                widget.box.erase();
+                Future.delayed(Duration.zero, () {
+                  Navigator.popAndPushNamed(context, '/homepageAsInitial');
+                });
+              },
+              child: Text(widget.title)),
+          backgroundColor: Colors.indigo),
       body: Padding(
         padding: const EdgeInsets.all(32.0),
         child: Column(

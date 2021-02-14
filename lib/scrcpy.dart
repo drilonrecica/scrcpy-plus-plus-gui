@@ -53,9 +53,17 @@ class _ScrcpyPageState extends State<ScrcpyPage> {
           title: Row(
             children: [
               Expanded(
-                child: Text(
-                  "Scrcpy++",
-                  textAlign: TextAlign.center,
+                child: GestureDetector(
+                  onDoubleTap: () {
+                    box.erase();
+                    Future.delayed(Duration.zero, () {
+                      Navigator.popAndPushNamed(context, '/homepageAsInitial');
+                    });
+                  },
+                  child: Text(
+                    "Scrcpy++",
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               ),
               GestureDetector(
