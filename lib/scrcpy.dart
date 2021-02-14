@@ -115,8 +115,12 @@ class _ScrcpyPageState extends State<ScrcpyPage> {
                   children: [
                     Text(
                       "Rotation ",
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          decoration: Platform.isLinux
+                              ? TextDecoration.lineThrough
+                              : TextDecoration.none),
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
@@ -295,7 +299,11 @@ class _ScrcpyPageState extends State<ScrcpyPage> {
                       child: Text(
                         "Stay awake",
                         style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            decoration: Platform.isLinux
+                                ? TextDecoration.lineThrough
+                                : TextDecoration.none),
                       ),
                     ),
                   ],
@@ -323,7 +331,11 @@ class _ScrcpyPageState extends State<ScrcpyPage> {
                       child: Text(
                         "Disable Screensaver",
                         style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            decoration: Platform.isLinux
+                                ? TextDecoration.lineThrough
+                                : TextDecoration.none),
                       ),
                     ),
                   ],
@@ -492,8 +504,12 @@ class _ScrcpyPageState extends State<ScrcpyPage> {
                   children: [
                     Text(
                       "Lock video orientation ___",
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          decoration: Platform.isLinux
+                              ? TextDecoration.lineThrough
+                              : TextDecoration.none),
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
@@ -616,6 +632,8 @@ class _ScrcpyPageState extends State<ScrcpyPage> {
   }
 
   Future<void> _startScrcpy() async {
+    bool notLinux = !Platform.isLinux;
+
     if (_titleController.text.isEmpty) {
       _deviceTitle = "Android Device";
     } else {
@@ -623,7 +641,11 @@ class _ScrcpyPageState extends State<ScrcpyPage> {
     }
 
     var scrcpyCommand =
-        "./scrcpy --window-title '$_deviceTitle' --rotation $_rotationValue --bit-rate $_bitrateValue";
+        "./scrcpy --window-title '$_deviceTitle' --bit-rate $_bitrateValue";
+
+    if (notLinux) {
+      scrcpyCommand = scrcpyCommand + " --rotation $_rotationValue";
+    }
 
     if (_maxHeight != '0') {
       scrcpyCommand = scrcpyCommand + " --max-size $_maxHeight";
@@ -645,11 +667,11 @@ class _ScrcpyPageState extends State<ScrcpyPage> {
       scrcpyCommand = scrcpyCommand + " --show-touches";
     }
 
-    if (_stayAwake) {
+    if (notLinux && _stayAwake) {
       scrcpyCommand = scrcpyCommand + " --stay-awake";
     }
 
-    if (_disableScreensaver) {
+    if (notLinux && _disableScreensaver) {
       scrcpyCommand = scrcpyCommand + " --disable-screensaver";
     }
 
@@ -657,7 +679,7 @@ class _ScrcpyPageState extends State<ScrcpyPage> {
       scrcpyCommand = scrcpyCommand + " --max-fps $_framerateValue";
     }
 
-    if (_videoOrientationValue != 0) {
+    if (notLinux && _videoOrientationValue != 0) {
       scrcpyCommand =
           scrcpyCommand + " --lock-video-orientation $_videoOrientationValue";
     }
