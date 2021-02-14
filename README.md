@@ -27,5 +27,7 @@ On some devices, you also need to enable an additional option to control it usin
 __adb__ must be installed and it's path set in the scrcpy++ options.
 
 Screenshots: 
+
+
 <img src="Screenshot1.png" width="400">
 <img src="Screenshot2.png" width="400">
