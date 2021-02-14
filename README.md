@@ -22,10 +22,10 @@ Make sure you enabled adb debugging on your device(s).
 
 On some devices, you also need to enable an additional option to control it using keyboard and mouse.
 
-[Scrcpy](https://github.com/Genymobile/scrcpy) must be installed and accesible through terminal (in PATH) using scrcpy command.
+[Scrcpy](https://github.com/Genymobile/scrcpy) must be installed and it's path set in the scrcpy++ options.
 
-__adb__ must be installed and accesible through terminal (in PATH) using adb command.
+__adb__ must be installed and it's path set in the scrcpy++ options.
 
-Screenshot: 
-
-<img src="Screenshot.png" width="400">
+Screenshots: 
+<img src="Screenshot1.png" width="400">
+<img src="Screenshot2.png" width="400">
